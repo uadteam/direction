@@ -9,35 +9,59 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
     <script type='text/javascript' src='http://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=AvmCEZKdTk8ZCCk0pTreSE5oCM47J1Bo-tWkKrhO1axB8i1X4sbbXVfNgfOLwEFv' async defer></script>
+    <script type='text/javascript'>
+        var map, watchId, userPin;
+    
+        function GetMap()
+        {
+            map = new Microsoft.Maps.Map('#myMap', {
+                credentials: "AvmCEZKdTk8ZCCk0pTreSE5oCM47J1Bo-tWkKrhO1axB8i1X4sbbXVfNgfOLwEFv"
+            });
+        }
+    
+        function StartTracking() {
+            //Add a pushpin to show the user's location.
+            userPin = new Microsoft.Maps.Pushpin(map.getCenter(), { visible: false });
+            map.entities.push(gpsPin);
+    
+            //Watch the users location.
+            watchId = navigator.geolocation.watchPosition(UsersLocationUpdated);
+        }
+    
+        function UsersLocationUpdated(position) {
+            var loc = new Microsoft.Maps.Location(
+                        position.coords.latitude,
+                        position.coords.longitude);
+    
+            //Update the user pushpin.
+            userPin.setLocation(loc);
+            userPin.setOptions({ visible: true });
+    
+            //Center the map on the user's location.
+            map.setView({ center: loc });
+        }
+    
+        function StopTracking() {
+            // Cancel the geolocation updates.
+            navigator.geolocation.clearWatch(watchId);
+    
+            //Remove the user pushpin.
+            map.entities.clear();
+        }
+        </script>
+        <script type='text/javascript' src='http://www.bing.com/api/maps/mapcontrol?callback=GetMap' async defer></script>
+    
 </head>
 <body onload="GetMap();">
 
 
-	<script type='text/javascript'>
-    function GetMap() {
-        var map = new Microsoft.Maps.Map('#myMap', {
-            credentials: "AvmCEZKdTk8ZCCk0pTreSE5oCM47J1Bo-tWkKrhO1axB8i1X4sbbXVfNgfOLwEFv"
-        });
-
-        //Request the user's location
-        navigator.geolocation.getCurrentPosition(function (position) {
-            var loc = new Microsoft.Maps.Location(
-                position.coords.latitude,
-                position.coords.longitude);
-
-            //Add a pushpin at the user's location.
-            var pin = new Microsoft.Maps.Pushpin(loc);
-            map.entities.push(pin);
-
-            //Center the map on the user's location.
-            map.setView({ center: loc, zoom: 15 });
-        });
-    }
-    </script>
-    <script type='text/javascript' src='http://www.bing.com/api/maps/mapcontrol?callback=GetMap' async defer></script>
-
-    <div id="myMap" style="position:relative;width:600px;height:400px;"></div>
+    <div id="myMap" style="position:relative;width:600px;height:400px;"></div><br/>
+    <input type="button" value="Start Continuous Tracking" onclick="StartTracking()" />
+    <input type="button" value="Stop Continuous Tracking" onclick="StopTracking()"/>
 
 
 </body>
 </html>
+
+
+
